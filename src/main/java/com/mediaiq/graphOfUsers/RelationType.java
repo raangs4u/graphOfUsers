@@ -6,5 +6,22 @@ package com.mediaiq.graphOfUsers;
 public enum RelationType {
     KNOWS,
     FRIEND,
-    RELATIVE
+    RELATIVE;
+
+    public static int getIntValue(RelationType relationType) {
+        int res = 0;
+        switch (relationType) {
+            case RELATIVE:
+                res = 0;
+                break;
+            case FRIEND:
+                res = 1;
+                break;
+            case KNOWS:
+                res = 2;
+                break;
+
+        }
+        return res;
+    }
 }

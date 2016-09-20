@@ -1,10 +1,13 @@
 package com.mediaiq.graphOfUsers;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ranga babu.
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class User {
 
     private static final AtomicInteger COUNTER = new AtomicInteger();
@@ -16,6 +19,14 @@ public class User {
     private int age;
 
     private String sex;
+
+    public User(int id, String name, int age, String sex, String location) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.sex = sex;
+        this.location = location;
+    }
 
     private String location;
 
