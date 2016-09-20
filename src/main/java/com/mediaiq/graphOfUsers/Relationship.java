@@ -1,18 +1,13 @@
 package com.mediaiq.graphOfUsers;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @author rmandada
  */
-@JsonIgnoreProperties(value = {"id"})
 public class Relationship {
 
-    private static final AtomicInteger COUNTER = new AtomicInteger();
+    /*private static final AtomicInteger COUNTER = new AtomicInteger();*/
 
-    private final int id;
+    private long id;
 
     private RelationType relationType;
 
@@ -20,7 +15,7 @@ public class Relationship {
 
     private User user2;
 
-    public Relationship(int id, String relationType, User user1, User user2) {
+    public Relationship(long id, String relationType, User user1, User user2) {
         this.id = id;
         this.relationType = RelationType.valueOf(relationType);
         this.user1 = user1;
@@ -31,11 +26,11 @@ public class Relationship {
         this.relationType = RelationType.valueOf(relationType);
         this.user1 = user1;
         this.user2 = user2;
-        this.id = COUNTER.getAndIncrement();
+        /*this.id = COUNTER.getAndIncrement();*/
     }
 
     public Relationship() {
-        id = COUNTER.getAndIncrement();
+        /*id = COUNTER.getAndIncrement();*/
     }
 
     public RelationType getRelationType() {
@@ -62,7 +57,7 @@ public class Relationship {
         this.user2 = user2;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 }

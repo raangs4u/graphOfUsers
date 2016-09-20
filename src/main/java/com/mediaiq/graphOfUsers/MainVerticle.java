@@ -34,8 +34,6 @@ public class MainVerticle extends AbstractVerticle {
     public void start(Future<Void> fut) throws Exception {
         dbVerticle = new DBVerticle();
         vertx.deployVerticle(dbVerticle);
-        System.out.println("THReadName: ####: "+ Thread.currentThread().getName());
-        //ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb().getUnderlying());
         Router router = Router.router(vertx);
 
         router.route("/").handler(routingContext -> routingContext.response()
@@ -49,7 +47,7 @@ public class MainVerticle extends AbstractVerticle {
 
         router.post("/relation/").handler(this::createRelation);
         router.get("/relations").handler(this::getAllRelations);
-        router.get("shortest-path/:userId1/:userId2").handler(this::getShortestPath);
+        router.get("/shortest-path/:userId1/:userId2").handler(this::getShortestPath);
 
         vertx.createHttpServer()
                 .requestHandler(router::accept)
@@ -71,7 +69,7 @@ public class MainVerticle extends AbstractVerticle {
             user.setName(jsonObj.get("name").getAsString());
             user.setAge(jsonObj.get("age").getAsInt());
             user.setSex(jsonObj.get("sex").getAsString());
-            user.setSex(jsonObj.get("location").getAsString());
+            user.setLocation(jsonObj.get("location").getAsString());
             ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
             dbVerticle.createUser(user);
         });
@@ -81,7 +79,6 @@ public class MainVerticle extends AbstractVerticle {
     public void createRelation(RoutingContext routingContext) {
         HttpServerRequest request = routingContext.request();
         request.bodyHandler(buffer -> {
-            ObjectMapper mapper = new ObjectMapper();
             Relationship relationship = null;
             relationship = Json.decodeValue(buffer.toString(), Relationship.class);
             ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
@@ -93,6 +90,7 @@ public class MainVerticle extends AbstractVerticle {
         HttpServerRequest request = routingContext.request();
         int userId1 = Integer.parseInt(request.getParam("UserId1"));
         int userId2 = Integer.parseInt(request.getParam("UserId2"));
+        ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
         LinkedList<User> users = dbVerticle.findShortestPathOfRelationship(userId1, userId2);
 
         routingContext.response()

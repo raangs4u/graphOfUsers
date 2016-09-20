@@ -10,9 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class User {
 
-    private static final AtomicInteger COUNTER = new AtomicInteger();
+    /*private static final AtomicInteger COUNTER = new AtomicInteger();*/
 
-    private final int id;
+    private long id;
 
     private String name;
 
@@ -20,7 +20,7 @@ public class User {
 
     private String sex;
 
-    public User(int id, String name, int age, String sex, String location) {
+    public User(long id, String name, int age, String sex, String location) {
         this.id = id;
         this.name = name;
         this.age = age;
@@ -31,7 +31,7 @@ public class User {
     private String location;
 
     public User(String name, int age, String sex, String location) {
-        this.id = COUNTER.getAndIncrement();
+        /*this.id = COUNTER.getAndIncrement();*/
         this.name = name;
         this.age = age;
         this.sex = sex;
@@ -39,7 +39,7 @@ public class User {
     }
 
     public User() {
-        this.id = COUNTER.getAndIncrement();
+        /*this.id = COUNTER.getAndIncrement();*/
     }
 
     public String getName() {
@@ -74,20 +74,11 @@ public class User {
         this.location = location;
     }
 
-    public int getId() {
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getId() {
         return id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        User user = (User) o;
-
-        return getId() == user.getId();
-
-    }
-
-    @Override
-    public int hashCode() {
-        return getId();
     }
 }
