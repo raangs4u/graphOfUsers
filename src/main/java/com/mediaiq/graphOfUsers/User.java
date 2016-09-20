@@ -1,9 +1,15 @@
 package com.mediaiq.graphOfUsers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author ranga babu.
  */
 public class User {
+
+    private static final AtomicInteger COUNTER = new AtomicInteger();
+
+    private final int id;
 
     private String name;
 
@@ -12,6 +18,18 @@ public class User {
     private String sex;
 
     private String location;
+
+    public User(String name, int age, String sex, String location) {
+        this.id = COUNTER.getAndIncrement();
+        this.name = name;
+        this.age = age;
+        this.sex = sex;
+        this.location = location;
+    }
+
+    public User() {
+        this.id = COUNTER.getAndIncrement();
+    }
 
     public String getName() {
         return name;
@@ -43,5 +61,22 @@ public class User {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        User user = (User) o;
+
+        return getId() == user.getId();
+
+    }
+
+    @Override
+    public int hashCode() {
+        return getId();
     }
 }
