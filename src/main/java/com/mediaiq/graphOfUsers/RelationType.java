@@ -8,6 +8,9 @@ public enum RelationType {
     FRIEND,
     RELATIVE;
 
+    /**
+     * Obtains the numeric value of the relation.
+     */
     public static int getIntValue(RelationType relationType) {
         int res = 0;
         switch (relationType) {

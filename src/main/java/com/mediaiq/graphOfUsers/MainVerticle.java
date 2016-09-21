@@ -1,16 +1,9 @@
 package com.mediaiq.graphOfUsers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -23,10 +16,6 @@ import io.vertx.ext.web.RoutingContext;
  * @author ranga babu.
  */
 public class MainVerticle extends AbstractVerticle {
-
-    private Map<User, Set<Relationship>> graph;
-
-    private UserService userService;
 
     private DBVerticle dbVerticle;
 
@@ -56,23 +45,19 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void stop(Future<Void> fut) throws Exception {
-       // userService.closeConnections();
+
     }
 
     public void createUser(RoutingContext routingContext) {
         HttpServerRequest request = routingContext.request();
         request.bodyHandler(buffer -> {
-            Gson gson = new Gson();
-            JsonElement element = gson.fromJson (buffer.toString(), JsonElement.class);
-            JsonObject jsonObj = element.getAsJsonObject();
-            User user = new User();
-            user.setName(jsonObj.get("name").getAsString());
-            user.setAge(jsonObj.get("age").getAsInt());
-            user.setSex(jsonObj.get("sex").getAsString());
-            user.setLocation(jsonObj.get("location").getAsString());
+            User user = Json.decodeValue(buffer.toString(), User.class);
             ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
             dbVerticle.createUser(user);
         });
+        routingContext.response()
+                .setStatusCode(201)
+                .end("New user created successfully.");
 
     }
 
@@ -84,6 +69,9 @@ public class MainVerticle extends AbstractVerticle {
             ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
             dbVerticle.createRelationship(relationship);
         });
+        routingContext.response()
+                .setStatusCode(201)
+                .end("New relation created successfully.");
     }
 
     public void getShortestPath(RoutingContext routingContext) {

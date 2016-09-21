@@ -1,11 +1,9 @@
 package com.mediaiq.graphOfUsers;
 
 /**
- * @author rmandada
+ * @author ranga babu
  */
-public class Relationship {
-
-    /*private static final AtomicInteger COUNTER = new AtomicInteger();*/
+public class Relationship implements Comparable<Relationship> {
 
     private long id;
 
@@ -26,11 +24,9 @@ public class Relationship {
         this.relationType = RelationType.valueOf(relationType);
         this.user1 = user1;
         this.user2 = user2;
-        /*this.id = COUNTER.getAndIncrement();*/
     }
 
     public Relationship() {
-        /*id = COUNTER.getAndIncrement();*/
     }
 
     public RelationType getRelationType() {
@@ -59,5 +55,10 @@ public class Relationship {
 
     public long getId() {
         return id;
+    }
+
+    @Override
+    public int compareTo(Relationship o) {
+        return new Long(this.getId()).compareTo(o.getId());
     }
 }

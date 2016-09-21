@@ -4,29 +4,30 @@ import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.iterator.ORecordIteratorClass;
-import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OClassImpl;
 import com.orientechnologies.orient.core.metadata.sequence.OSequence;
-import com.orientechnologies.orient.core.metadata.sequence.OSequenceCached;
 import com.orientechnologies.orient.core.metadata.sequence.OSequenceLibrary;
-import com.orientechnologies.orient.core.metadata.sequence.OSequenceOrdered;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.Json;
 
 /**
- * @author rmandada
+ * @author ranga babu
  */
 public class DBVerticle extends AbstractVerticle {
 
-    public ODatabaseDocumentTx getDb() {
-        return db;
-    }
-
     private ODatabaseDocumentTx db;
+
     @Override
     public void start() throws Exception {
         db = new ODatabaseDocumentTx("plocal:/tmp/databases/userdb").open("admin", "admin");
@@ -37,10 +38,9 @@ public class DBVerticle extends AbstractVerticle {
             OSequence userseq = sequenceLibrary.createSequence("userseq", OSequence.SEQUENCE_TYPE.ORDERED, new OSequence.CreateParams().setStart(0l).setIncrement(1));
             OSequence relseq = sequenceLibrary.createSequence("relseq", OSequence.SEQUENCE_TYPE.ORDERED, new OSequence.CreateParams().setStart(0l).setIncrement(1));
         } catch (Exception e) {
-            //e.printStackTrace();
+
         }
         ODatabaseRecordThreadLocal.INSTANCE.set(db);
-        //createSomeData();
     }
 
     public void createSomeData() {
@@ -58,7 +58,9 @@ public class DBVerticle extends AbstractVerticle {
         db.close();
     }
 
-    //@Override
+    /**
+     * Creates a user.
+     */
     public void createUser(User user) {
         ODocument doc = new ODocument("User");
         doc.field("id", getIncrementedUserId());
@@ -69,7 +71,9 @@ public class DBVerticle extends AbstractVerticle {
         db.save(doc);
     }
 
-    //@Override
+    /**
+     * Creates a relationship.
+     */
     public void createRelationship(Relationship rel) {
         ODocument doc = new ODocument("Relationship");
         doc.field("id", getIncrementedRelationId());
@@ -79,6 +83,10 @@ public class DBVerticle extends AbstractVerticle {
         db.save(doc);
     }
 
+    /**
+     * Obtains all users.
+     * @return list of all users.
+     */
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         ODatabaseDocument database = ODatabaseRecordThreadLocal.INSTANCE.get();
@@ -87,33 +95,44 @@ public class DBVerticle extends AbstractVerticle {
             User user = new User(document.field("id"), document.field("name"), document.field("age"), document.field("sex"), document.field("location"));
             users.add(user);
         }
+        Collections.sort(users);
         return users;
     }
 
+    /**
+     * Obtains all relations.
+     * @return list of all relations.
+     */
     public List<Relationship> getAllRelations() {
         List<Relationship> relations = new ArrayList<>();
         ODatabaseDocument database = ODatabaseRecordThreadLocal.INSTANCE.get();
-        ORecordIteratorClass<ODocument> users1 = database.browseClass("Relationship");
-        for (ODocument document: users1) {
+        ORecordIteratorClass<ODocument> relations1 = database.browseClass("Relationship");
+        for (ODocument document: relations1) {
             User user1 = Json.decodeValue(document.field("user1"), User.class);
             User user2 = Json.decodeValue(document.field("user2"), User.class);
             Relationship relation = new Relationship(document.field("id"), document.field("relationType"), user1, user2);
             relations.add(relation);
         }
+        Collections.sort(relations);
         return relations;
     }
 
+    /**
+     * Obtains the shortest path between user1 and user2.
+     * @param userId1 id of user1.
+     * @param userId2 id of user2.
+     * @return path as linked list of users.
+     */
     public LinkedList<User> findShortestPathOfRelationship(int userId1, int userId2) {
         LinkedList<User> result = new LinkedList<>();
         Map<Integer, User> userMap = constructUserMap();
         Map<Integer, Set<Relationship>> relationMap = constructRelationMap(userMap);
         List<Vertex> vertexes = shortestPath(userId1, userMap, relationMap);
         getPath(vertexes, vertexes.get(userId1-1), vertexes.get(userId2-1), result, userMap);
-        //Collections.reverse(result);
         return result;
     }
 
-    public List<Vertex> shortestPath(int userId1, Map<Integer, User> userMap, Map<Integer, Set<Relationship>> relationMap) {
+    private List<Vertex> shortestPath(int userId1, Map<Integer, User> userMap, Map<Integer, Set<Relationship>> relationMap) {
         PriorityQueue<Vertex> queue = new PriorityQueue<>(userMap.size());
         List<Vertex> vertexes = new ArrayList<>();
         for (int i = 0; i < userMap.size(); i++) {
@@ -141,7 +160,7 @@ public class DBVerticle extends AbstractVerticle {
 
     }
 
-    public static void getPath(List<Vertex> vertexes, Vertex u, Vertex v, LinkedList<User> path, Map<Integer, User> users) {
+    private void getPath(List<Vertex> vertexes, Vertex u, Vertex v, LinkedList<User> path, Map<Integer, User> users) {
         if (u.user == v.user) {
             path.addLast(users.get(u.user));
         } else if (v.pi == -1) {
@@ -152,7 +171,7 @@ public class DBVerticle extends AbstractVerticle {
         }
     }
 
-    static class Vertex implements Comparable<Vertex>{
+    private class Vertex implements Comparable<Vertex>{
         int user;
         Double key ;
         int pi;
@@ -174,6 +193,9 @@ public class DBVerticle extends AbstractVerticle {
         }
     }
 
+    /**
+     * Constructs a map of users with ids.
+     */
     public Map<Integer, User> constructUserMap() {
         List<User> users = getAllUsers();
         Map<Integer, User> map = new HashMap<>();
@@ -183,6 +205,9 @@ public class DBVerticle extends AbstractVerticle {
         return map;
     }
 
+    /**
+     * Constructs a map of user and his relations.
+     */
     public Map<Integer, Set<Relationship>> constructRelationMap(Map<Integer, User> userMap) {
         List<Relationship> relationships = getAllRelations();
         Map<Integer, Set<Relationship>> map = new HashMap<>();
@@ -199,6 +224,10 @@ public class DBVerticle extends AbstractVerticle {
         return map;
     }
 
+    /**
+     * Generates a auto incremented id for the new user.
+     * @return id
+     */
     private long getIncrementedUserId() {
         OSequence seq = db.getMetadata().getSequenceLibrary().getSequence("userseq");
         if (seq == null) {
@@ -209,6 +238,10 @@ public class DBVerticle extends AbstractVerticle {
         return seq.next();
     }
 
+    /**
+     * Generates a auto incremented id for the new relation.
+     * @return id
+     */
     private long getIncrementedRelationId() {
         OSequence seq = db.getMetadata().getSequenceLibrary().getSequence("relseq");
         if (seq == null) {
@@ -217,6 +250,10 @@ public class DBVerticle extends AbstractVerticle {
         }
 
         return seq.next();
+    }
+
+    public ODatabaseDocumentTx getDb() {
+        return db;
     }
 
 }

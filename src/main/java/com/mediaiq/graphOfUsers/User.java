@@ -1,16 +1,9 @@
 package com.mediaiq.graphOfUsers;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @author ranga babu.
  */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class User {
-
-    /*private static final AtomicInteger COUNTER = new AtomicInteger();*/
+public class User implements Comparable<User> {
 
     private long id;
 
@@ -31,7 +24,6 @@ public class User {
     private String location;
 
     public User(String name, int age, String sex, String location) {
-        /*this.id = COUNTER.getAndIncrement();*/
         this.name = name;
         this.age = age;
         this.sex = sex;
@@ -39,7 +31,6 @@ public class User {
     }
 
     public User() {
-        /*this.id = COUNTER.getAndIncrement();*/
     }
 
     public String getName() {
@@ -80,5 +71,10 @@ public class User {
 
     public long getId() {
         return id;
+    }
+
+    @Override
+    public int compareTo(User o) {
+        return new Long(this.getId()).compareTo(o.id);
     }
 }
