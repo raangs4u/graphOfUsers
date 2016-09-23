@@ -11,6 +11,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.StaticHandler;
 
 /**
  * @author ranga babu.
@@ -37,6 +38,8 @@ public class MainVerticle extends AbstractVerticle {
         router.post("/relation/").handler(this::createRelation);
         router.get("/relations").handler(this::getAllRelations);
         router.get("/shortest-path/:userId1/:userId2").handler(this::getShortestPath);
+
+        router.route("/assets/*").handler(StaticHandler.create("assets"));
 
         vertx.createHttpServer()
                 .requestHandler(router::accept)
