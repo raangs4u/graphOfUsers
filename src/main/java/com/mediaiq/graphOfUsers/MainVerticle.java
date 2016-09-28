@@ -56,11 +56,12 @@ public class MainVerticle extends AbstractVerticle {
         request.bodyHandler(buffer -> {
             User user = Json.decodeValue(buffer.toString(), User.class);
             ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
-            dbVerticle.createUser(user);
+            List<User> allUsers = dbVerticle.createUser(user);
+            routingContext.response()
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .end(Json.encodePrettily(allUsers));
+
         });
-        routingContext.response()
-                .setStatusCode(201)
-                .end("New user created successfully.");
 
     }
 
@@ -70,11 +71,11 @@ public class MainVerticle extends AbstractVerticle {
             Relationship relationship = null;
             relationship = Json.decodeValue(buffer.toString(), Relationship.class);
             ODatabaseRecordThreadLocal.INSTANCE.set(dbVerticle.getDb());
-            dbVerticle.createRelationship(relationship);
+            List<Relationship> relationships = dbVerticle.createRelationship(relationship);
+            routingContext.response()
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .end(Json.encodePrettily(relationships));
         });
-        routingContext.response()
-                .setStatusCode(201)
-                .end("New relation created successfully.");
     }
 
     public void getShortestPath(RoutingContext routingContext) {

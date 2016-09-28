@@ -61,7 +61,7 @@ public class DBVerticle extends AbstractVerticle {
     /**
      * Creates a user.
      */
-    public void createUser(User user) {
+    public List<User> createUser(User user) {
         ODocument doc = new ODocument("User");
         doc.field("id", getIncrementedUserId());
         doc.field("name", user.getName());
@@ -69,18 +69,20 @@ public class DBVerticle extends AbstractVerticle {
         doc.field("sex", user.getSex());
         doc.field("location", user.getLocation());
         db.save(doc);
+        return getAllUsers();
     }
 
     /**
      * Creates a relationship.
      */
-    public void createRelationship(Relationship rel) {
+    public List<Relationship> createRelationship(Relationship rel) {
         ODocument doc = new ODocument("Relationship");
         doc.field("id", getIncrementedRelationId());
         doc.field("user1", Json.encode(rel.getUser1()));
         doc.field("user2", Json.encode(rel.getUser2()));
         doc.field("relationType", rel.getRelationType());
         db.save(doc);
+        return getAllRelations();
     }
 
     /**
